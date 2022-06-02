@@ -1,9 +1,10 @@
 import json
-import urllib
+import urllib.request
 import pandas as pd
 from neo4j import GraphDatabase
 
-driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'letmein'))
+driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'yousef'))
+
 
 def run_query(query, params={}):
     with driver.session() as session:
@@ -17,13 +18,14 @@ def ie_pipeline(text, relation_threshold=0.9, entities_threshold=0.8):
         ("text", text), ("relation_threshold", relation_threshold),
         ("entities_threshold", entities_threshold)])
 
-    url = "http://localhost:5000?" + data
+    url = "http://localhost:7687?" + data
     req = urllib.request.Request(url, data=data.encode("utf8"), method="GET")
     with urllib.request.urlopen(req, timeout=150) as f:
         response = f.read()
         response = json.loads(response.decode("utf8"))
     # Output the annotations.
     return response
+
 
 example_data = ie_pipeline("""
 Elon Musk is a business magnate, industrial designer, and engineer.
@@ -37,3 +39,6 @@ He transferred to the University of Pennsylvania two years later, where he recei
 He moved to California in 1995 to attend Stanford University, but decided instead to pursue a business career.
 He went on co-founding a web software company Zip2 with his brother Kimbal Musk.
   """)
+
+print(example_data)
+
